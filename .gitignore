@@ -1,0 +1,10 @@
+models/
+corpus/
+aerospace_taxonomy.adk/
+raw_data/
+*.log
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+env/

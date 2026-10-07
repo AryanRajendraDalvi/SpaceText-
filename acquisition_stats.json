@@ -1,0 +1,17 @@
+{
+  "total_ingested": 9032,
+  "by_source": {
+    "isro": 3956,
+    "hal": 559,
+    "indian_journals": 4517,
+    "openalex": 0
+  },
+  "by_taxonomy_depth": {
+    "depth_1": 7349,
+    "depth_2": 1600,
+    "depth_3": 36
+  },
+  "errors": 0,
+  "start_time": 1788120412.6973546,
+  "elapsed_seconds": 5269.9
+}

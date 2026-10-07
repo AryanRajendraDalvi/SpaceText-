@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceText - Aerospace Summarizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+        .tab-inactive { color: #64748b; font-weight: 500; }
+        .tab-inactive:hover { color: #334155; }
+        
+        /* Markdown styling for the output */
+        .prose h2 { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+        .prose p { margin-bottom: 1rem; color: #475569; line-height: 1.6; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        .prose li { margin-bottom: 0.25rem; }
+        .prose strong { color: #0f172a; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen w-screen flex overflow-hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="w-64 bg-slate-50 border-r border-slate-200 flex flex-col h-full flex-shrink-0">
+        <div class="p-6 border-b border-slate-200">
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Space<span class="text-blue-600">Text</span></h1>
+            <p class="text-xs text-slate-500 font-medium mt-1">Aerospace Document Summarizer</p>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar py-4">
+            <!-- Nav Items -->
+            <nav class="space-y-1 mb-8 px-2">
+                <a id="nav-summarize" href="#" onclick="switchPage('summarize')" class="nav-btn flex items-center px-4 py-3 bg-blue-50 text-blue-700 rounded-lg mx-2 border-l-4 border-blue-600 font-semibold shadow-sm transition-colors">
+                    <i class="fas fa-home w-6 text-center mr-2 text-blue-600"></i>
+                    <div class="leading-tight">
+                        <div class="text-sm">Summarize</div>
+                        <div class="text-[10px] text-blue-500 font-normal">Upload and summarize</div>
+                    </div>
+                </a>
+                <a id="nav-ask" href="#" onclick="switchPage('ask')" class="nav-btn flex items-center px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mx-2 border-l-4 border-transparent transition-colors">
+                    <i class="far fa-comments w-6 text-center mr-2"></i>
+                    <div class="leading-tight">
+                        <div class="text-sm font-semibold">Ask Question</div>
+                        <div class="text-[10px] text-slate-400">Query your documents</div>
+                    </div>
+                </a>
+                <a id="nav-browse" href="#" onclick="switchPage('browse')" class="nav-btn flex items-center px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mx-2 border-l-4 border-transparent transition-colors">
+                    <i class="fas fa-database w-6 text-center mr-2"></i>
+                    <div class="leading-tight">
+                        <div class="text-sm font-semibold">Browse by Source</div>
+                        <div class="text-[10px] text-slate-400">Search by agency</div>
+                    </div>
+                </a>
+                <a id="nav-library" href="#" onclick="switchPage('library')" class="nav-btn flex items-center px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mx-2 border-l-4 border-transparent transition-colors">
+                    <i class="far fa-file-alt w-6 text-center mr-2"></i>
+                    <div class="leading-tight">
+                        <div class="text-sm font-semibold">Document Library</div>
+                        <div class="text-[10px] text-slate-400">View past uploads</div>
+                    </div>
+                </a>
+            </nav>
+
+            <!-- Sources -->
+            <div class="px-6">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Sources</h3>
+                <ul class="space-y-4">
+                    <li class="flex items-center text-sm font-semibold text-slate-700">
+                        <span class="w-6 text-center mr-3 text-orange-500"><i class="fas fa-satellite"></i></span> ISRO
+                    </li>
+                    <li class="flex items-center text-sm font-semibold text-slate-700">
+                        <span class="w-6 text-center mr-3 text-blue-700"><i class="fas fa-globe-americas"></i></span> NASA
+                    </li>
+                    <li class="flex items-center text-sm font-semibold text-slate-700">
+                        <!-- Replaced ESA with HAL -->
+                        <span class="w-6 text-center mr-3 text-teal-600"><i class="fas fa-plane-departure"></i></span> HAL
+                    </li>
+                    <li class="flex items-center text-sm font-semibold text-slate-700">
+                        <span class="w-6 text-center mr-3 text-yellow-500"><i class="fas fa-shield-alt"></i></span> DRDO
+                    </li>
+                    <li class="flex items-center text-sm font-semibold text-slate-700">
+                        <span class="w-6 text-center mr-3 text-red-600"><i class="fas fa-file-pdf"></i></span> ArXiv
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CENTER CONTENT -->
+    <div class="flex-1 bg-white h-full overflow-y-auto custom-scrollbar flex flex-col">
+        <!-- Top Nav -->
+        <div class="h-16 border-b border-slate-200 flex items-center justify-end px-8 space-x-6 text-sm font-semibold text-slate-600 shrink-0">
+            <a href="#" class="hover:text-blue-600">About</a>
+            <a href="#" class="hover:text-blue-600">Documentation</a>
+            <a href="#" class="hover:text-blue-600 flex items-center"><i class="fab fa-github mr-2 text-lg"></i> GitHub</a>
+        </div>
+
+        <!-- ───────────────────────────────────────────────────────── -->
+        <!-- PAGE 1: SUMMARIZE (Default)                               -->
+        <!-- ───────────────────────────────────────────────────────── -->
+        <div id="page-summarize" class="page max-w-4xl w-full mx-auto p-8 flex-1">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Summarize Aerospace Documents</h2>
+            <p class="text-slate-500 mb-6">Upload a research paper, technical report or document to get a structured summary, key findings and more.</p>
+
+            <div class="mb-4">
+                <input type="text" id="searchInput" placeholder="Search GarudDB for a topic (e.g. 'ISRO solid rocket boosters')..." 
+                       class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-700 shadow-sm transition-all mb-4">
+                
+                <div id="dropzone" class="relative border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors py-10 flex flex-col items-center justify-center text-center cursor-pointer">
+                    <input type="file" id="fileInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.txt,.docx">
+                    <i class="fas fa-file-alt text-4xl text-slate-300 mb-3" id="dropzoneIcon"></i>
+                    <p class="text-slate-700 font-semibold" id="dropzoneText">Drag and drop a file here</p>
+                    <p class="text-xs text-slate-400 mt-1 mb-4">Supports PDF & TXT (Max size: 50 MB)</p>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors shadow-sm pointer-events-none">Choose File</button>
+                </div>
+            </div>
+
+            <button id="summarizeBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors text-center text-lg mb-8 flex justify-center items-center">
+                <span>Summarize Document</span>
+                <i id="loadingSpinner" class="fas fa-circle-notch fa-spin ml-2 hidden"></i>
+            </button>
+
+            <div id="resultsContainer" class="hidden">
+                <div class="flex items-center justify-between border-b border-slate-200 mb-6">
+                    <div class="flex space-x-6 overflow-x-auto custom-scrollbar">
+                        <button id="tab-structured" onclick="switchTab('structured')" class="tab-btn py-3 px-1 tab-active flex items-center text-sm transition-colors whitespace-nowrap"><i class="far fa-file-alt mr-2"></i> Structured Summary</button>
+                        <button id="tab-findings" onclick="switchTab('findings')" class="tab-btn py-3 px-1 tab-inactive flex items-center text-sm transition-colors whitespace-nowrap"><i class="far fa-lightbulb mr-2"></i> Key Findings</button>
+                        <button id="tab-sections" onclick="switchTab('sections')" class="tab-btn py-3 px-1 tab-inactive flex items-center text-sm transition-colors whitespace-nowrap"><i class="far fa-list-alt mr-2"></i> Sections</button>
+                        <button id="tab-entities" onclick="switchTab('entities')" class="tab-btn py-3 px-1 tab-inactive flex items-center text-sm transition-colors whitespace-nowrap"><i class="fas fa-crosshairs mr-2"></i> Entities</button>
+                        <button id="tab-raw" onclick="switchTab('raw')" class="tab-btn py-3 px-1 tab-inactive flex items-center text-sm transition-colors whitespace-nowrap"><i class="fas fa-code mr-2"></i> Raw Output</button>
+                    </div>
+                    <div class="flex space-x-2 pb-2 shrink-0 ml-4">
+                        <button onclick="exportTabContent()" class="px-3 py-1.5 border border-slate-200 rounded text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center transition-colors"><i class="fas fa-download mr-1"></i> Export</button>
+                        <button onclick="copyTabContent()" class="px-3 py-1.5 border border-slate-200 rounded text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center transition-colors"><i class="far fa-copy mr-1"></i> <span id="copyText">Copy</span></button>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-sm relative">
+                    <div class="flex items-center space-x-2 mb-6">
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">GarudDB RAG</span>
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold border border-purple-200">Param-1 (2.9B)</span>
+                    </div>
+                    
+                    <div id="content-structured" class="tab-content prose max-w-none"></div>
+                    <div id="content-findings" class="tab-content prose max-w-none hidden"></div>
+                    <div id="content-sections" class="tab-content hidden"></div>
+                    <div id="content-entities" class="tab-content hidden"></div>
+                    <div id="content-raw" class="tab-content hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ───────────────────────────────────────────────────────── -->
+        <!-- PAGE 2: ASK QUESTION                                      -->
+        <!-- ───────────────────────────────────────────────────────── -->
+        <div id="page-ask" class="page hidden max-w-4xl w-full mx-auto p-8 flex-1 flex flex-col">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Ask a Question</h2>
+            <p class="text-slate-500 mb-6">Query GarudDB using natural language to get direct answers from your aerospace documents.</p>
+
+            <div class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-6 mb-4 overflow-y-auto flex flex-col space-y-4">
+                <!-- Chat Message -->
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm"><i class="fas fa-robot text-sm"></i></div>
+                    <div class="bg-white border border-slate-200 rounded-lg rounded-tl-none px-4 py-3 text-sm text-slate-700 shadow-sm max-w-2xl">
+                        Hello! I am Param-1. Ask me any specific question about ISRO, NASA, ESA, HAL, or DRDO, and I will search GarudDB to find the answer for you.
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3">
+                <input type="text" placeholder="e.g., What is the maximum payload of GSLV Mark III?" class="flex-1 px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors"><i class="fas fa-paper-plane mr-2"></i> Ask</button>
+            </div>
+        </div>
+
+        <!-- ───────────────────────────────────────────────────────── -->
+        <!-- PAGE 3: BROWSE BY SOURCE                                  -->
+        <!-- ───────────────────────────────────────────────────────── -->
+        <div id="page-browse" class="page hidden max-w-5xl w-full mx-auto p-8 flex-1">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Browse by Source</h2>
+            <p class="text-slate-500 mb-8">Explore the GarudDB aerospace taxonomy grouped by space agency and organization.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Source Cards -->
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer flex items-center">
+                    <div class="w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 text-2xl mr-4"><i class="fas fa-satellite"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">ISRO</h3>
+                        <p class="text-sm text-slate-500">2,410 Documents</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer flex items-center">
+                    <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-2xl mr-4"><i class="fas fa-globe-americas"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">NASA</h3>
+                        <p class="text-sm text-slate-500">14,922 Documents</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer flex items-center">
+                    <div class="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 text-2xl mr-4"><i class="fas fa-plane-departure"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">HAL</h3>
+                        <p class="text-sm text-slate-500">845 Documents</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer flex items-center">
+                    <div class="w-16 h-16 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 text-2xl mr-4"><i class="fas fa-shield-alt"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">DRDO</h3>
+                        <p class="text-sm text-slate-500">1,205 Documents</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer flex items-center">
+                    <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-600 text-2xl mr-4"><i class="fas fa-file-pdf"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">ArXiv</h3>
+                        <p class="text-sm text-slate-500">38,695 Documents</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ───────────────────────────────────────────────────────── -->
+        <!-- PAGE 4: DOCUMENT LIBRARY                                  -->
+        <!-- ───────────────────────────────────────────────────────── -->
+        <div id="page-library" class="page hidden max-w-5xl w-full mx-auto p-8 flex-1">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Document Library</h2>
+            <p class="text-slate-500 mb-8">Manage and view all embedded documents currently indexed in GarudDB.</p>
+
+            <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Filename</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Source</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Domain</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Upload Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50 cursor-pointer transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800"><i class="fas fa-file-pdf text-red-500 mr-2"></i> drdo_inertial_navigation.pdf</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded">DRDO</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Navigation Systems</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Oct 7, 2026</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 cursor-pointer transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800"><i class="fas fa-file-alt text-slate-500 mr-2"></i> isro_gslv_mark3_specs.txt</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded">ISRO</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Propulsion</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Oct 6, 2026</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 cursor-pointer transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800"><i class="fas fa-file-word text-blue-500 mr-2"></i> hal_tejas_avionics.docx</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-teal-100 text-teal-800 text-xs font-bold rounded">HAL</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Avionics</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Oct 5, 2026</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 cursor-pointer transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800"><i class="fas fa-file-pdf text-red-500 mr-2"></i> nasa_artemis_trajectory.pdf</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded">NASA</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Orbital Mechanics</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Oct 1, 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR (Sample Queries) -->
+    <div class="w-80 bg-slate-50 border-l border-slate-200 h-full flex flex-col flex-shrink-0">
+        <div class="p-6 overflow-y-auto custom-scrollbar h-full">
+
+            <!-- Sample Queries -->
+            <div class="mb-8">
+                <div class="flex items-center text-slate-800 font-bold text-lg mb-4">
+                    <i class="far fa-lightbulb mr-2 text-yellow-500"></i> Sample Queries
+                </div>
+                <div class="space-y-2">
+                    <button onclick="document.getElementById('searchInput').value='NavIC and GPS hybrid constellations'" class="w-full text-left px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 font-medium hover:border-blue-300 hover:shadow-sm transition-all flex justify-between items-center group">
+                        <span class="truncate pr-2">NavIC and GPS hybrid constellations</span>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-blue-500 transition-colors"></i>
+                    </button>
+                    <button onclick="document.getElementById('searchInput').value='Reentry vehicle warhead tracking'" class="w-full text-left px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 font-medium hover:border-blue-300 hover:shadow-sm transition-all flex justify-between items-center group">
+                        <span class="truncate pr-2">Reentry vehicle warhead tracking</span>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-blue-500 transition-colors"></i>
+                    </button>
+                    <button onclick="document.getElementById('searchInput').value='Internal ballistics of solid rocket propulsion'" class="w-full text-left px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 font-medium hover:border-blue-300 hover:shadow-sm transition-all flex justify-between items-center group">
+                        <span class="truncate pr-2">Internal ballistics of rockets</span>
+                        <i class="fas fa-chevron-right text-slate-300 group-hover:text-blue-500 transition-colors"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 relative">
+                <div class="absolute -left-2.5 top-5 w-5 h-5 bg-blue-600 rounded-full flex justify-center items-center text-white text-xs border-4 border-slate-50"><i class="fas fa-info"></i></div>
+                <h4 class="font-bold text-sm text-blue-900 mb-1 ml-2">About SpaceText</h4>
+                <p class="text-xs text-blue-800 leading-relaxed ml-2">SpaceText is a domain-specific small language model designed to understand, categorize and summarize aerospace research documents from sources like ISRO, NASA, HAL and DRDO. It uses Param-1 (2.9B) with GarudDB for accurate, source-aware summaries.</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Frontend Logic -->
+    <script>
+        // --- Page Navigation Routing ---
+        function switchPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+            
+            // Show selected page
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) targetPage.classList.remove('hidden');
+
+            // Reset all nav buttons to inactive state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn flex items-center px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mx-2 border-l-4 border-transparent transition-colors";
+                // Change icon color back to gray
+                const icon = btn.querySelector('i');
+                if (icon) icon.className = icon.className.replace('text-blue-600', '').trim();
+                // Change subtext color back to gray
+                const subtext = btn.querySelector('.text-\\[10px\\]');
+                if (subtext) {
+                    subtext.classList.remove('text-blue-500', 'font-normal');
+                    subtext.classList.add('text-slate-400');
+                }
+            });
+
+            // Highlight active nav button
+            const activeBtn = document.getElementById('nav-' + pageId);
+            if (activeBtn) {
+                activeBtn.className = "nav-btn flex items-center px-4 py-3 bg-blue-50 text-blue-700 rounded-lg mx-2 border-l-4 border-blue-600 font-semibold shadow-sm transition-colors";
+                // Change icon color to blue
+                const icon = activeBtn.querySelector('i');
+                if (icon) icon.className += ' text-blue-600';
+                // Change subtext color to blue
+                const subtext = activeBtn.querySelector('.text-\\[10px\\]');
+                if (subtext) {
+                    subtext.classList.remove('text-slate-400');
+                    subtext.classList.add('text-blue-500', 'font-normal');
+                }
+            }
+        }
+
+
+        // --- Results Tab Switching Logic ---
+        let currentTab = 'structured';
+        let lastResponseData = null;
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            const tabs = ['structured', 'findings', 'sections', 'entities', 'raw'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('tab-inactive');
+                } else {
+                    btn.classList.add('tab-inactive');
+                    btn.classList.remove('tab-active');
+                }
+                
+                const content = document.getElementById(`content-${t}`);
+                if (t === tabId) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        async function copyTabContent() {
+            const contentDiv = document.getElementById(`content-${currentTab}`);
+            if (!contentDiv) return;
+            try {
+                await navigator.clipboard.writeText(contentDiv.innerText);
+                const copyTextSpan = document.getElementById('copyText');
+                copyTextSpan.innerText = 'Copied!';
+                setTimeout(() => copyTextSpan.innerText = 'Copy', 2000);
+            } catch (err) {
+                alert("Failed to copy text.");
+            }
+        }
+
+        function exportTabContent() {
+            const contentDiv = document.getElementById(`content-${currentTab}`);
+            if (!contentDiv) return;
+            const textToSave = contentDiv.innerText;
+            const blob = new Blob([textToSave], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SpaceText_Export_${currentTab}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- File Upload UI Logic ---
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                document.getElementById('dropzoneText').innerText = fileName;
+                document.getElementById('dropzoneIcon').className = "fas fa-file-pdf text-4xl text-blue-500 mb-3";
+                document.getElementById('searchInput').disabled = true; // Disable search when file is selected
+            } else {
+                document.getElementById('dropzoneText').innerText = "Drag and drop a file here";
+                document.getElementById('dropzoneIcon').className = "fas fa-file-alt text-4xl text-slate-300 mb-3";
+                document.getElementById('searchInput').disabled = false;
+            }
+        });
+
+        // --- API Call Logic ---
+        document.getElementById('summarizeBtn').addEventListener('click', async () => {
+            const query = document.getElementById('searchInput').value;
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!query && !file) {
+                alert("Please enter a search query or upload a file!");
+                return;
+            }
+
+            const btn = document.getElementById('summarizeBtn');
+            const spinner = document.getElementById('loadingSpinner');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            spinner.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+
+            try {
+                let response;
+                if (file) {
+                    // Upload File Mode
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    // GarudDB Search Mode
+                    response = await fetch('/api/summarize', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query })
+                    });
+                }
+                
+                const data = await response.json();
+                lastResponseData = data;
+                
+                // Populate Tabs
+                document.getElementById('content-structured').innerHTML = marked.parse(data.structured_summary || "No structured summary available.");
+                document.getElementById('content-findings').innerHTML = marked.parse(data.narrative_summary || "*No narrative summary provided by the model.*");
+                
+                let sectHtml = '<h3 class="text-lg font-bold mb-4 text-slate-800">Retrieved Documents (GarudDB)</h3><div class="space-y-4">';
+                if (data.cluster && data.cluster.length > 0) {
+                    data.cluster.forEach(doc => {
+                        sectHtml += `<div class="p-4 border border-slate-200 rounded-lg bg-slate-50 hover:shadow-sm transition-shadow">
+                            <span class="bg-blue-100 text-blue-800 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded inline-block mb-2"><i class="fas fa-file-alt mr-1"></i> ${doc[0]}</span>
+                            <p class="text-sm text-slate-600 whitespace-pre-wrap">${doc[1]}</p>
+                        </div>`;
+                    });
+                } else {
+                    sectHtml += '<p class="text-sm text-slate-500 italic">No supporting documents found in database.</p>';
+                }
+                sectHtml += '</div>';
+                document.getElementById('content-sections').innerHTML = sectHtml;
+
+                document.getElementById('content-entities').innerHTML = `
+                    <h3 class="text-lg font-bold mb-4 text-slate-800">Router Agent Extraction</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-5 bg-slate-50 rounded-lg border border-slate-200">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fas fa-magic mr-1"></i> Optimized Query Sent to Vector DB</p>
+                            <p class="font-semibold text-slate-800 text-lg">${data.optimized_query || 'N/A'}</p>
+                        </div>
+                        <div class="p-5 bg-slate-50 rounded-lg border border-slate-200">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fas fa-building mr-1"></i> Target Agency Detected</p>
+                            <p class="font-semibold text-slate-800 text-lg uppercase">${data.detected_source || 'ALL'}</p>
+                        </div>
+                    </div>`;
+
+                document.getElementById('content-raw').innerHTML = `<pre class="bg-slate-900 text-green-400 p-6 rounded-xl overflow-auto text-xs font-mono shadow-inner shadow-black/50"><code>${JSON.stringify(data, null, 2)}</code></pre>`;
+
+                resultsContainer.classList.remove('hidden');
+                switchTab('structured');
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (error) {
+                alert("Error connecting to backend: " + error);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
+                spinner.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
